@@ -1,0 +1,157 @@
+// This is your Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String     @id @default(cuid())
+  name          String?
+  email         String     @unique
+  emailVerified DateTime?
+  password      String
+  image         String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+  proposals     Proposal[]
+  settings      UserSettings?
+
+  @@map("users")
+}
+
+model UserSettings {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName      String?
+  companyLogo      String?
+  primaryColor     String   @default("#4F46E5")
+  accentColor      String   @default("#10B981")
+  defaultTone      String   @default("professional")
+  defaultLength    String   @default("medium")
+  footerText       String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@map("user_settings")
+}
+
+model Proposal {
+  id          String            @id @default(cuid())
+  title       String
+  type        ProposalType
+  status      ProposalStatus    @default(DRAFT)
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  templateId  String?
+  template    Template?         @relation(fields: [templateId], references: [id])
+  sections    ProposalSection[]
+  exports     Export[]
+  metadata    Json?             // Store additional metadata
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@map("proposals")
+  @@index([userId])
+  @@index([status])
+}
+
+model Template {
+  id          String      @id @default(cuid())
+  name        String
+  description String
+  type        ProposalType
+  icon        String?
+  color       String?
+  isPublic    Boolean     @default(true)
+  sections    Json        // Array of default section structures
+  proposals   Proposal[]
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@map("templates")
+}
+
+model ProposalSection {
+  id          String   @id @default(cuid())
+  proposalId  String
+  proposal    Proposal @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  title       String
+  content     String
+  order       Int
+  aiGenerated Boolean  @default(false)
+  metadata    Json?    // Store AI prompts, tokens used, etc.
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("proposal_sections")
+  @@index([proposalId])
+  @@unique([proposalId, order])
+}
+
+model Export {
+  id          String       @id @default(cuid())
+  proposalId  String
+  proposal    Proposal     @relation(fields: [proposalId], references: [id], onDelete: Cascade)
+  format      ExportFormat
+  fileUrl     String?
+  fileName    String
+  fileSize    Int?
+  status      ExportStatus @default(PENDING)
+  createdAt   DateTime     @default(now())
+
+  @@map("exports")
+  @@index([proposalId])
+}
+
+model AIUsage {
+  id          String   @id @default(cuid())
+  userId      String
+  model       String
+  tokensUsed  Int
+  operation   String   // "generate", "improve", "rephrase", etc.
+  cost        Float?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@map("ai_usage")
+  @@index([userId])
+  @@index([createdAt])
+}
+
+enum ProposalType {
+  BUSINESS
+  PROJECT
+  GRANT
+  MARKETING
+  PARTNERSHIP
+  CONSULTING
+  SALES
+  CUSTOM
+}
+
+enum ProposalStatus {
+  DRAFT
+  REVIEW
+  COMPLETED
+  SENT
+  ARCHIVED
+}
+
+enum ExportFormat {
+  PDF
+  DOCX
+  HTML
+}
+
+enum ExportStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
