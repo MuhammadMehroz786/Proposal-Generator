@@ -410,10 +410,33 @@ export default function EditorPage() {
     }
   };
 
-  // Export temporarily disabled
-  // const handleExport = () => {
-  //   router.push(`/export/${proposalId}`);
-  // };
+  const handleExport = async () => {
+    try {
+      setIsSaving(true);
+      const response = await fetch(`/api/proposals/${proposalId}/export-pdf`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Export failed');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${proposal?.title || 'proposal'}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -571,7 +594,7 @@ export default function EditorPage() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            {/* Export temporarily disabled - will be enabled after deployment */}
+            <Button onClick={handleExport} variant="secondary" icon={Download}>Export PDF</Button>
           </div>
         </div>
 
