@@ -13,7 +13,7 @@ const exportSchema = z.object({
 // POST /api/proposals/[id]/export - Export proposal to PDF or DOCX
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -25,10 +25,12 @@ export async function POST(
     const body = await req.json();
     const { format } = exportSchema.parse(body);
 
+    const { id } = await params;
+
     // Get proposal with sections
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
       include: {

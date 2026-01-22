@@ -13,7 +13,7 @@ const updateProposalSchema = z.object({
 // GET /api/proposals/[id] - Get a single proposal
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,9 +22,11 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
       include: {
@@ -52,7 +54,7 @@ export async function GET(
 // PATCH /api/proposals/[id] - Update a proposal
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -61,10 +63,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify ownership
     const existing = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -77,7 +81,7 @@ export async function PATCH(
     const validatedData = updateProposalSchema.parse(body);
 
     const proposal = await prisma.proposal.update({
-      where: { id: params.id },
+      where: { id },
       data: validatedData,
       include: {
         sections: {
@@ -101,7 +105,7 @@ export async function PATCH(
 // DELETE /api/proposals/[id] - Delete a proposal
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -110,10 +114,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify ownership
     const existing = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -123,7 +129,7 @@ export async function DELETE(
     }
 
     await prisma.proposal.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ message: 'Proposal deleted successfully' });

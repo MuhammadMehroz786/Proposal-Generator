@@ -13,7 +13,7 @@ const updateSectionSchema = z.object({
 // PATCH /api/proposals/[id]/sections/[sectionId] - Update a section
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { id: string; sectionId: string } }
+  { params }: { params: Promise<{ id: string; sectionId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,10 +22,12 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id, sectionId } = await params;
+
     // Verify ownership
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -38,7 +40,7 @@ export async function PATCH(
     const validatedData = updateSectionSchema.parse(body);
 
     const section = await prisma.proposalSection.update({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
       data: validatedData,
     });
 
@@ -56,7 +58,7 @@ export async function PATCH(
 // DELETE /api/proposals/[id]/sections/[sectionId] - Delete a section
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string; sectionId: string } }
+  { params }: { params: Promise<{ id: string; sectionId: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -65,10 +67,12 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id, sectionId } = await params;
+
     // Verify ownership
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -78,7 +82,7 @@ export async function DELETE(
     }
 
     await prisma.proposalSection.delete({
-      where: { id: params.sectionId },
+      where: { id: sectionId },
     });
 
     return NextResponse.json({ message: 'Section deleted successfully' });

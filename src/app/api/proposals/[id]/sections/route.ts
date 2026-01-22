@@ -13,7 +13,7 @@ const createSectionSchema = z.object({
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -22,10 +22,12 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify user owns the proposal
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -35,7 +37,7 @@ export async function GET(
     }
 
     const sections = await prisma.proposalSection.findMany({
-      where: { proposalId: params.id },
+      where: { proposalId: id },
       orderBy: { order: 'asc' },
     });
 
@@ -48,7 +50,7 @@ export async function GET(
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -57,10 +59,12 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { id } = await params;
+
     // Verify user owns the proposal
     const proposal = await prisma.proposal.findFirst({
       where: {
-        id: params.id,
+        id,
         userId: session.user.id,
       },
     });
@@ -75,7 +79,7 @@ export async function POST(
     const section = await prisma.proposalSection.create({
       data: {
         ...validatedData,
-        proposalId: params.id,
+        proposalId: id,
       },
     });
 
