@@ -1,11 +1,26 @@
 import OpenAI from 'openai';
 
-if (!process.env.OPENAI_API_KEY) {
-  throw new Error('Missing OPENAI_API_KEY environment variable');
+let openaiInstance: OpenAI | null = null;
+
+function getOpenAI() {
+  if (!openaiInstance) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error('Missing OPENAI_API_KEY environment variable');
+    }
+    openaiInstance = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+  return openaiInstance;
 }
 
-export const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+// Export a proxy that creates the instance on first access
+export const openai = new Proxy({} as OpenAI, {
+  get(target, prop) {
+    const instance = getOpenAI();
+    const value = (instance as any)[prop];
+    return typeof value === 'function' ? value.bind(instance) : value;
+  }
 });
 
 export const generateProposalSection = async ({
@@ -71,7 +86,7 @@ Write clear, compelling content that fits naturally in a professional business p
 };
 
 export const improveContent = async (content: string, instruction: string) => {
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model: 'gpt-4',
     messages: [
       {

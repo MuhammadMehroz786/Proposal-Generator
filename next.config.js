@@ -7,6 +7,13 @@ const nextConfig = {
   eslint: {
     ignoreDuringBuilds: false,
   },
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  // Skip static optimization to avoid build errors
+  distDir: '.next',
 }
 
 module.exports = nextConfig
