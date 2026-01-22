@@ -64,7 +64,7 @@ export default function AIChatPage() {
 
     // Store user's answer
     const dataKeys = ['proposalType', 'title', 'client', 'problem', 'solution', 'deliverables', 'timeline', 'budget'];
-    setConversationData(prev => ({
+    setConversationData((prev: any) => ({
       ...prev,
       [dataKeys[currentStep]]: input,
     }));

@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, ProposalType } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
@@ -36,7 +36,7 @@ async function main() {
     {
       name: 'Web Development Proposal',
       description: 'Standard structure for software development projects',
-      type: 'PROJECT',
+      type: ProposalType.PROJECT,
       icon: 'Layout',
       color: 'text-blue-600',
       isPublic: true,
@@ -53,7 +53,7 @@ async function main() {
     {
       name: 'Marketing Retainer',
       description: 'Monthly services and analytics breakdown for marketing agencies',
-      type: 'MARKETING',
+      type: ProposalType.MARKETING,
       icon: 'BarChart3',
       color: 'text-pink-600',
       isPublic: true,
@@ -69,7 +69,7 @@ async function main() {
     {
       name: 'Grant Application',
       description: 'Formal structure for non-profit and research funding requests',
-      type: 'GRANT',
+      type: ProposalType.GRANT,
       icon: 'FileText',
       color: 'text-emerald-600',
       isPublic: true,
@@ -86,7 +86,7 @@ async function main() {
     {
       name: 'Consulting Agreement',
       description: 'Professional services proposal for consulting engagements',
-      type: 'CONSULTING',
+      type: ProposalType.CONSULTING,
       icon: 'User',
       color: 'text-amber-600',
       isPublic: true,
@@ -103,7 +103,7 @@ async function main() {
     {
       name: 'Business Partnership',
       description: 'Strategic partnership and collaboration proposals',
-      type: 'PARTNERSHIP',
+      type: ProposalType.PARTNERSHIP,
       icon: 'Users',
       color: 'text-purple-600',
       isPublic: true,
@@ -134,7 +134,7 @@ async function main() {
   const sampleProposal = await prisma.proposal.create({
     data: {
       title: 'Sample Web Development Proposal',
-      type: 'PROJECT',
+      type: ProposalType.PROJECT,
       status: 'DRAFT',
       userId: user.id,
       sections: {

@@ -58,7 +58,7 @@ export async function POST(
         content: s.content,
         order: s.order,
       })),
-      companyName: proposal.user.settings?.companyName,
+      companyName: proposal.user.settings?.companyName ?? undefined,
       primaryColor: proposal.user.settings?.primaryColor,
     };
 
@@ -88,7 +88,7 @@ export async function POST(
     });
 
     // Return file as download
-    return new NextResponse(buffer, {
+    return new Response(new Uint8Array(buffer), {
       headers: {
         'Content-Type': contentType,
         'Content-Disposition': `attachment; filename="${fileName}"`,
