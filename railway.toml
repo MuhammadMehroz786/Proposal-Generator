@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install && npx prisma generate && npm run build"
+buildCommand = "DATABASE_URL=file:./dev.db npm install && npx prisma generate && npm run build"
 
 [deploy]
 startCommand = "npx prisma db push && npm start"
