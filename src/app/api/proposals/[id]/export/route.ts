@@ -1,9 +1,10 @@
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
-import { generatePDF } from '@/lib/export-pdf';
-import { generateDOCX } from '@/lib/export-docx';
 import { z } from 'zod';
 
 const exportSchema = z.object({
@@ -67,10 +68,14 @@ export async function POST(
     let contentType: string;
 
     if (format === 'PDF') {
+      // Dynamic import to avoid build-time issues
+      const { generatePDF } = await import('@/lib/export-pdf');
       buffer = await generatePDF(exportData);
       fileName = `${proposal.title.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`;
       contentType = 'application/pdf';
     } else {
+      // Dynamic import to avoid build-time issues
+      const { generateDOCX } = await import('@/lib/export-docx');
       buffer = await generateDOCX(exportData);
       fileName = `${proposal.title.replace(/[^a-zA-Z0-9]/g, '_')}.docx`;
       contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
