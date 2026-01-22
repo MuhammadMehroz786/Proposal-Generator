@@ -410,9 +410,10 @@ export default function EditorPage() {
     }
   };
 
-  const handleExport = () => {
-    router.push(`/export/${proposalId}`);
-  };
+  // Export temporarily disabled
+  // const handleExport = () => {
+  //   router.push(`/export/${proposalId}`);
+  // };
 
   if (isLoading) {
     return (
@@ -570,7 +571,7 @@ export default function EditorPage() {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Button onClick={handleExport} variant="secondary" icon={Download}>Export</Button>
+            {/* Export temporarily disabled - will be enabled after deployment */}
           </div>
         </div>
 
